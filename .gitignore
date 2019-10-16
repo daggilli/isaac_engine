@@ -2,3 +2,4 @@ isaac_engine
 *.o
 *.d
 .vscode/ipch
+isaac_test_harness
