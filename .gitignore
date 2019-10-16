@@ -1,0 +1,4 @@
+isaac_engine
+*.o
+*.d
+.vscode/ipch/
