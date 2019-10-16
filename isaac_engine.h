@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <random>
+#include <string>
+#include <vector>
 #include "isaac.h"
 
 namespace IsaacEngine {
@@ -19,7 +21,8 @@ namespace IsaacEngine {
     explicit IsaacEngine(std::random_device &rd) : prng(rd) {}
 
     void seed(std::random_device &rd) { prng.seed(rd); }
-
+    void seed(std::vector<uint32_t> &seedVec) { prng.seed(seedVec.data(), seedVec.size()); }
+    void seed(const std::string &seedStr) { prng.seed(seedStr.data(), seedStr.length()); }
     result_type operator()() { return prng.rand(); }
 
     void discard(unsigned long long n) {
