@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <iostream>
 #include <random>
+#include <string>
+#include <vector>
 #include "isaac.h"
 #include "isaac_engine.h"
 
@@ -44,5 +46,14 @@ int main() {
   isengb.discard(2);
 
   std::cout << std::boolalpha << (isenga == isengb) << "\n";
+
+  std::string sstr("1234567");
+
+  isenga.seed(sstr);
+
+  std::vector<uint32_t> svec{1, 2, 4, 5, 6, 7, 8};
+
+  isengb.seed(svec);
+
   return 0;
 }

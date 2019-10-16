@@ -47,12 +47,7 @@ namespace Isaac {
           f(0x9e3779b9),
           g(0x9e3779b9),
           h(0x9e3779b9) {
-      std::fill(randrsl, randrsl + kRandSize, 0);
-      if (seedArr != nullptr) {
-        std::size_t tlen = std::min(seedlen, kRandSize);
-        std::copy(seedArr, seedArr + tlen, randrsl);
-      }
-      randinit(true);
+      seed(seedArr, seedlen);
     }
 
     Isaac(const char* const seedArr, const std::size_t seedlen)
@@ -67,12 +62,7 @@ namespace Isaac {
           f(0x9e3779b9),
           g(0x9e3779b9),
           h(0x9e3779b9) {
-      std::fill(randrsl, randrsl + kRandSize, 0);
-      if (seedArr != nullptr) {
-        std::size_t tlen = std::min(seedlen, kRandSize * sizeof(uint32_t));
-        std::memcpy(reinterpret_cast<char*>(randrsl), seedArr, tlen);
-      }
-      randinit(true);
+      seed(seedArr, seedlen);
     }
 
     Isaac(std::random_device& rd)
@@ -88,6 +78,24 @@ namespace Isaac {
           g(0x9e3779b9),
           h(0x9e3779b9) {
       seed(rd);
+    }
+
+    void seed(const uint32_t* const seedArr, const std::size_t seedlen) {
+      std::fill(randrsl, randrsl + kRandSize, 0);
+      if (seedArr != nullptr) {
+        std::size_t tlen = std::min(seedlen, kRandSize);
+        std::copy(seedArr, seedArr + tlen, randrsl);
+      }
+      randinit(true);
+    }
+
+    void seed(const char* const seedArr, const std::size_t seedlen) {
+      std::fill(randrsl, randrsl + kRandSize, 0);
+      if (seedArr != nullptr) {
+        std::size_t tlen = std::min(seedlen, kRandSize * sizeof(uint32_t));
+        std::memcpy(reinterpret_cast<char*>(randrsl), seedArr, tlen);
+      }
+      randinit(true);
     }
 
     void seed(std::random_device& rd) {
