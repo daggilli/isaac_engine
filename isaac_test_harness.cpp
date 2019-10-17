@@ -9,6 +9,15 @@
 #include "isaac_engine.h"
 
 int main() {
+  // std::random_device rd;
+
+  IsaacEngine::IsaacEngine iseng;
+
+  std::cout << std::setfill('0') << std::hex << std::setw(8) << iseng() << "\n";
+
+  exit(0);
+
+#if 0
   uint32_t seed[Isaac::RANDOM_SEED_SIZE];
 
   std::fill(seed, seed + Isaac::RANDOM_SEED_SIZE, 0);
@@ -55,5 +64,30 @@ int main() {
 
   isengb.seed(svec);
 
+  /*
+  for (auto i = 0; i < 2560; i++) isa.rand();
+
+  std::cout << isa << "\n";
+   */
+
+#endif
+
+#if 0
+  // Isaac::Isaac isz("This is <i>not</i> the right mytext.", 36);
+  Isaac::Isaac isz;
+
+  Isaac::Isaac isc("This is <i>not</i> the right mytext.", 36);
+
+  std::cout << "\n";
+
+  for (auto i = 0; i < 32; i++) {
+    for (auto j = 0; j < 8; j++) {
+      std::cout << std::setbase(16) << std::setw(8) << isc.rand() << " ";
+    }
+    std::cout << "\n";
+  }
+  std::cout << std::setbase(16) << std::setw(8) << isc.rand() << "\n";
+
+#endif
   return 0;
 }
