@@ -20,6 +20,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <iomanip>
+#include <ios>
 #include <random>
 
 static_assert(__cplusplus >= 201103, "C++ version must be C++11 or greater");
@@ -33,7 +35,8 @@ namespace Isaac {
    public:
     friend bool operator==(const Isaac& lhs, const Isaac& rhs);
     friend bool operator!=(const Isaac& lhs, const Isaac& rhs);
-    Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
+    friend std::ostream& operator<<(std::ostream& os, const Isaac& is);
+    explicit Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
 
     Isaac(const uint32_t* const seedArr, const std::size_t seedlen)
         : randa(0),
@@ -81,21 +84,50 @@ namespace Isaac {
     }
 
     void seed(const uint32_t* const seedArr, const std::size_t seedlen) {
+      // std::cout << "SEED UINT32\n";
       std::fill(randrsl, randrsl + kRandSize, 0);
       if (seedArr != nullptr) {
         std::size_t tlen = std::min(seedlen, kRandSize);
         std::copy(seedArr, seedArr + tlen, randrsl);
       }
+      /* for (auto i = 0; i < 8; i++) {
+        for (auto j = 0; j < 8; j++) {
+          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
+        }
+        std::cout << "\n";
+      } */
       randinit(true);
+      /*isaac();
+      for (auto i = 0; i < 32; i++) {
+        for (auto j = 0; j < 8; j++) {
+          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
+        }
+        std::cout << "\n";
+      }
+      std::cout << "\n";
+      isaac();
+      for (auto i = 0; i < 32; i++) {
+        for (auto j = 0; j < 8; j++) {
+          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
+        }
+        std::cout << "\n";
+      } */
     }
 
     void seed(const char* const seedArr, const std::size_t seedlen) {
+      /* std::cout << "SEED CHAR\n";
       std::fill(randrsl, randrsl + kRandSize, 0);
       if (seedArr != nullptr) {
         std::size_t tlen = std::min(seedlen, kRandSize * sizeof(uint32_t));
         std::memcpy(reinterpret_cast<char*>(randrsl), seedArr, tlen);
-      }
+      } */
       randinit(true);
+      /* for (auto i = 0; i < 32; i++) {
+        for (auto j = 0; j < 8; j++) {
+          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
+        }
+        std::cout << "\n";
+      } */
     }
 
     void seed(std::random_device& rd) {
@@ -136,7 +168,7 @@ namespace Isaac {
     }
 
     void randinit(const bool flag) {
-      int i;
+      size_t i;
       uint32_t *m = randmem, *r = randrsl;
 
       for (i = 0; i < 4; ++i) /* scramble it */
@@ -246,6 +278,16 @@ namespace Isaac {
     uint32_t randmem[kRandSize];
     uint32_t randa, randb, randc;
     uint32_t a, b, c, d, e, f, g, h;
+
+    class FormatSaver {
+     public:
+      FormatSaver(std::ostream& stream) : strm(stream), state(nullptr) { state.copyfmt(stream); }
+      ~FormatSaver() { strm.copyfmt(state); }
+
+     private:
+      std::ostream& strm;
+      std::ios state;
+    };
   };
 
   bool operator==(const Isaac& lhs, const Isaac& rhs) {
@@ -255,6 +297,27 @@ namespace Isaac {
   }
 
   bool operator!=(const Isaac& lhs, const Isaac& rhs) { return !(lhs == rhs); }
+
+  std::ostream& operator<<(std::ostream& os, const Isaac& is) {
+    {
+      Isaac::FormatSaver saver(os);
+      os << std::setbase(16);
+      os.fill('0');
+      os << "      a: " << std::setw(8) << is.a << "\n";
+      os << "      b: " << std::setw(8) << is.b << "\n";
+      os << "      c: " << std::setw(8) << is.c << "\n";
+      os << "      d: " << std::setw(8) << is.d << "\n";
+      os << "      e: " << std::setw(8) << is.e << "\n";
+      os << "      f: " << std::setw(8) << is.f << "\n";
+      os << "      g: " << std::setw(8) << is.g << "\n";
+      os << "      h: " << std::setw(8) << is.h << "\n";
+      os << "  randa: " << std::setw(8) << is.randa << "\n";
+      os << "  randb: " << std::setw(8) << is.randb << "\n";
+      os << "  randc: " << std::setw(8) << is.randc << "\n";
+      os << "randcnt: " << std::setw(8) << is.randcnt << "\n";
+    }
+    return os;
+  }
 }  // namespace Isaac
 
 #endif

@@ -20,6 +20,7 @@ namespace IsaacEngine {
     IsaacEngine() : prng() {}
     explicit IsaacEngine(std::random_device &rd) : prng(rd) {}
 
+    void seed() { prng.seed(static_cast<uint32_t *>(nullptr), 0); }
     void seed(std::random_device &rd) { prng.seed(rd); }
     void seed(std::vector<uint32_t> &seedVec) { prng.seed(seedVec.data(), seedVec.size()); }
     void seed(const std::string &seedStr) { prng.seed(seedStr.data(), seedStr.length()); }
