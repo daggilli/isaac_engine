@@ -3,3 +3,4 @@ isaac_engine
 *.d
 .vscode/ipch
 isaac_test_harness
+test/unittest/isaac_engine.test
