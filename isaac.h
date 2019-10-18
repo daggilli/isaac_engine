@@ -115,12 +115,19 @@ namespace Isaac {
     }
 
     void seed(const char* const seedArr, const std::size_t seedlen) {
-      /* std::cout << "SEED CHAR\n";
+      // std::cout << "SEED CHAR\n";
       std::fill(randrsl, randrsl + kRandSize, 0);
       if (seedArr != nullptr) {
         std::size_t tlen = std::min(seedlen, kRandSize * sizeof(uint32_t));
         std::memcpy(reinterpret_cast<char*>(randrsl), seedArr, tlen);
-      } */
+      }
+      /* for (auto i = 0; i < 32; i++) {
+        for (auto j = 0; j < 8; j++) {
+          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
+        }
+        std::cout << "\n";
+      }
+      std::cout << "\nAFTER 1st RANDINIT\n"; */
       randinit(true);
       /* for (auto i = 0; i < 32; i++) {
         for (auto j = 0; j < 8; j++) {
