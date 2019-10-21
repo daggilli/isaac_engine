@@ -19,15 +19,15 @@ int main() {
   exit(0);
 #endif
 
-#if 0
   uint32_t seed[Isaac::RANDOM_SEED_SIZE];
 
   std::fill(seed, seed + Isaac::RANDOM_SEED_SIZE, 0);
 
   Isaac::Isaac isa(seed, Isaac::RANDOM_SEED_SIZE);
 
-  // std::cout << std::hex << std::setw(8) << std::setfill('0') << isa.rand() << "\n";
+  std::cout << std::hex << std::setw(8) << std::setfill('0') << isa.rand() << "\n";
 
+#if 0
   std::random_device rd;
 
   /* Isaac::Isaac isard(rd);
@@ -74,17 +74,58 @@ int main() {
 
 #endif
 
-#if 1
+  std::vector<uint32_t> randVec;
+  auto ix = 0;
+
+#if 0
   Isaac::Isaac isc("This is <i>not</i> the right mytext.", 36);
 
   std::cout << "\n";
 
-  for (auto i = 0; i < 32; i++) {
+  for (auto i = 0; i < 3; i++) {
     for (auto j = 0; j < 8; j++) {
-      std::cout << std::setbase(16) << std::setw(8) << std::setfill('0') << isc.rand() << " ";
+      auto rval = isc.rand();
+      // std::cout << std::setbase(16) << std::setw(8) << std::setfill('0') << rval << " ";
+      randVec.emplace_back(rval);
     }
     std::cout << "\n";
   }
+
+  ix = 0;
+  for (auto r : randVec) {
+    std::cout << std::setbase(16) << std::setw(8) << std::setfill('0') << r << " ";
+    if (++ix % 8 == 0) std::cout << "\n";
+  }
+  std::cout << "\n" << std::setbase(10) << randVec.size() << "\n";
 #endif
+
+  std::cout << "\n";
+
+#if 0
+  randVec.clear();
+
+  IsaacEngine::IsaacEngine iseng;
+
+  iseng.seed("This is <i>not</i> the right mytext.");
+
+  for (auto i = 0; i < 3; i++) {
+    for (auto j = 0; j < 8; j++) {
+      auto rval = iseng();
+      // std::cout << std::setbase(16) << std::setw(8) << std::setfill('0') << rval << " ";
+      randVec.emplace_back(rval);
+    }
+    std::cout << "\n";
+  }
+
+  ix = 0;
+  for (auto r : randVec) {
+    std::cout << std::setbase(16) << std::setw(8) << std::setfill('0') << r << " ";
+    if (++ix % 8 == 0) std::cout << "\n";
+  }
+  std::cout << "\n" << std::setbase(10) << randVec.size() << "\n";
+#endif
+
+  // auto g = Isaac::GOLDEN_RATIO;
+
   return 0;
 }
