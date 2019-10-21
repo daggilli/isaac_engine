@@ -26,6 +26,10 @@
 
 static_assert(__cplusplus >= 201103, "C++ version must be C++11 or greater");
 
+namespace {
+  const uint32_t GOLDEN_RATIO = 0x9e3779b9;
+}
+
 namespace Isaac {
   const uint32_t kRandSizeBits = 8;
   const std::size_t kRandSize = 1 << kRandSizeBits;
@@ -38,103 +42,26 @@ namespace Isaac {
     friend std::ostream& operator<<(std::ostream& os, const Isaac& is);
     explicit Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
 
-    Isaac(const uint32_t* const seedArr, const std::size_t seedlen)
-        : randa(0),
-          randb(0),
-          randc(0),
-          a(0x9e3779b9),
-          b(0x9e3779b9),
-          c(0x9e3779b9),
-          d(0x9e3779b9),
-          e(0x9e3779b9),
-          f(0x9e3779b9),
-          g(0x9e3779b9),
-          h(0x9e3779b9) {
-      seed(seedArr, seedlen);
-    }
-
-    Isaac(const char* const seedArr, const std::size_t seedlen)
-        : randa(0),
-          randb(0),
-          randc(0),
-          a(0x9e3779b9),
-          b(0x9e3779b9),
-          c(0x9e3779b9),
-          d(0x9e3779b9),
-          e(0x9e3779b9),
-          f(0x9e3779b9),
-          g(0x9e3779b9),
-          h(0x9e3779b9) {
-      seed(seedArr, seedlen);
-    }
-
-    Isaac(std::random_device& rd)
-        : randa(0),
-          randb(0),
-          randc(0),
-          a(0x9e3779b9),
-          b(0x9e3779b9),
-          c(0x9e3779b9),
-          d(0x9e3779b9),
-          e(0x9e3779b9),
-          f(0x9e3779b9),
-          g(0x9e3779b9),
-          h(0x9e3779b9) {
-      seed(rd);
-    }
+    Isaac(const uint32_t* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
+    Isaac(const char* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
+    Isaac(std::random_device& rd) { seed(rd); }
 
     void seed(const uint32_t* const seedArr, const std::size_t seedlen) {
-      // std::cout << "SEED UINT32\n";
       std::fill(randrsl, randrsl + kRandSize, 0);
       if (seedArr != nullptr) {
         std::size_t tlen = std::min(seedlen, kRandSize);
         std::copy(seedArr, seedArr + tlen, randrsl);
       }
-      /* for (auto i = 0; i < 8; i++) {
-        for (auto j = 0; j < 8; j++) {
-          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
-        }
-        std::cout << "\n";
-      } */
       randinit(true);
-      /*isaac();
-      for (auto i = 0; i < 32; i++) {
-        for (auto j = 0; j < 8; j++) {
-          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
-        }
-        std::cout << "\n";
-      }
-      std::cout << "\n";
-      isaac();
-      for (auto i = 0; i < 32; i++) {
-        for (auto j = 0; j < 8; j++) {
-          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
-        }
-        std::cout << "\n";
-      } */
     }
 
     void seed(const char* const seedArr, const std::size_t seedlen) {
-      // std::cout << "SEED CHAR\n";
       std::fill(randrsl, randrsl + kRandSize, 0);
       if (seedArr != nullptr) {
         std::size_t tlen = std::min(seedlen, kRandSize * sizeof(uint32_t));
         std::memcpy(reinterpret_cast<char*>(randrsl), seedArr, tlen);
       }
-      /* for (auto i = 0; i < 32; i++) {
-        for (auto j = 0; j < 8; j++) {
-          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
-        }
-        std::cout << "\n";
-      }
-      std::cout << "\nAFTER 1st RANDINIT\n"; */
       randinit(true);
-      /* for (auto i = 0; i < 32; i++) {
-        for (auto j = 0; j < 8; j++) {
-          std::cout << std::setw(8) << std::hex << std::setfill('0') << randrsl[i * 8 + j] << " ";
-        }
-        std::cout << "\n";
-      } */
     }
 
     void seed(std::random_device& rd) {
@@ -174,15 +101,20 @@ namespace Isaac {
       randa = a;
     }
 
+    void reset() {
+      a = b = c = d = e = f = g = h = GOLDEN_RATIO;
+      randa = randb = randc = 0;
+    }
+
     void randinit(const bool flag) {
       size_t i;
       uint32_t *m = randmem, *r = randrsl;
 
-      for (i = 0; i < 4; ++i) /* scramble it */
-        mix();
+      reset();
+
+      for (i = 0; i < 4; ++i) mix();
 
       if (flag) {
-        /* initialize using the contents of r[] as the seed */
         for (i = 0; i < kRandSize; i += 8) {
           a += r[i];
           b += r[i + 1];
@@ -203,7 +135,6 @@ namespace Isaac {
           m[i + 7] = h;
         }
 
-        /* do a second pass to make all of the seed affect all of m */
         for (i = 0; i < kRandSize; i += 8) {
           a += m[i];
           b += m[i + 1];
@@ -224,7 +155,6 @@ namespace Isaac {
           m[i + 7] = h;
         }
       } else {
-        /* fill in m[] with messy stuff */
         for (i = 0; i < kRandSize; i += 8) {
           mix();
           m[i] = a;
@@ -238,8 +168,8 @@ namespace Isaac {
         }
       }
 
-      isaac();             /* fill in the first set of results */
-      randcnt = kRandSize; /* prepare to use the first set of results */
+      isaac();
+      randcnt = kRandSize;
     }
 
     uint32_t ind(uint32_t* mm, uint32_t x) {
