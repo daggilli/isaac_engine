@@ -1,19 +1,27 @@
 #ifndef __ISAAC_H__
 #define __ISAAC_H__
 
-/**********************************************************************
+/**********************************************************************************
 
-   C++ implementation of ISAAC CSPRNG
+  C++ implementation of ISAAC CSPRNG
 
-   Algorithm by Robert J. Jenkins Jr.
+  Algorithm by Robert J. Jenkins Jr.
+  http://www.burtleburtle.net/bob/rand/isaacafa.html
 
-   Adapted by David Gillies
+  Explicitly released into the public domain by Jenkins 26 Jun 2001
+  see http://www.burtleburtle.net/bob/c/rand.h
 
-   N.B. a C++ compiler capable of generating C++11 compliant
-   code is REQUIRED. g++ 4.7 will work, although g++ 4.8 or higher
-   is preferred.
+  Adapted by David Gillies
 
-**********************************************************************/
+  Adaptation released into the public domain. See LICENSE for details
+
+  --
+
+  N.B. a C++ compiler capable of generating C++11 compliant
+  code is REQUIRED. g++ 4.7 will work, although g++ 4.8 or higher
+  is preferred.
+
+**********************************************************************************/
 
 #include <algorithm>
 #include <cmath>
@@ -22,7 +30,11 @@
 #include <cstring>
 #include <iomanip>
 #include <ios>
+#ifdef __USE_MOCKRANDOM__
+#include "test/unittest/mockrandom.h"
+#else
 #include <random>
+#endif
 
 static_assert(__cplusplus >= 201103, "C++ version must be C++11 or greater");
 
@@ -37,9 +49,22 @@ namespace Isaac {
 
   class Isaac {
    public:
-    friend bool operator==(const Isaac& lhs, const Isaac& rhs);
-    friend bool operator!=(const Isaac& lhs, const Isaac& rhs);
-    friend std::ostream& operator<<(std::ostream& os, const Isaac& is);
+    friend std::ostream& operator<<(std::ostream& os, const Isaac& isc) {
+      {
+        Isaac::FormatSaver saver(os);
+        os << std::setbase(10) << std::left;
+        os << isc.randa << " " << isc.randb << " " << isc.randc << " ";
+        os << isc.randcnt << " ";
+        for (size_t i = 0; i < kRandSize; i++) os << isc.randrsl[i] << " ";
+      }
+      return os;
+    }
+    friend std::istream& operator>>(std::istream& is, Isaac& isc) {
+      is >> isc.randa >> isc.randb >> isc.randc;
+      is >> isc.randcnt;
+      for (size_t i = 0; i < kRandSize; i++) is >> randrsl[i];
+      return is;
+    }
     explicit Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
 
     Isaac(const uint32_t* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
@@ -66,6 +91,10 @@ namespace Isaac {
 
     void seed(std::random_device& rd) {
       std::generate(randrsl, randrsl + kRandSize, [&rd]() -> uint32_t { return static_cast<uint32_t>(rd()); });
+      /* std::cout << std::setbase(16);
+      for (uint32_t i = 0; i < RANDOM_SEED_SIZE; i++) {
+        std::cout << std::setw(8) << std::setfill('0') << randrsl[i] << "\n";
+      } */
       randinit(true);
     }
 
@@ -77,42 +106,62 @@ namespace Isaac {
       return randrsl[randcnt];
     }
 
+    bool operator==(const Isaac& rhs) {
+      return randcnt == rhs.randcnt && randa == rhs.randa && randb == rhs.randb && randc == rhs.randc &&
+             std::equal(randrsl, randrsl + kRandSize, rhs.randrsl);
+    }
+
+    bool operator!=(const Isaac& rhs) { return !(*this == rhs); }
+
+    std::string dump() {
+      std::ostringstream outStr;
+
+      outStr << std::setbase(16);
+      outStr.fill('0');
+      outStr << "  randa: " << std::setw(8) << randa << "\n";
+      outStr << "  randb: " << std::setw(8) << randb << "\n";
+      outStr << "  randc: " << std::setw(8) << randc << "\n";
+      outStr << "randcnt: " << std::setw(8) << randcnt << "\n";
+
+      return outStr.str();
+      ;
+    }
+
    private:
     void isaac() {
-      uint32_t x, y, *m, *mm, *m2, *r, *mend;
+      uint32_t a, b, x, y, *m, *mm, *m2, *r, *mend;
 
       mm = randmem;
       r = randrsl;
       a = randa;
       b = randb + (++randc);
       for (m = mm, mend = m2 = m + (kRandSize / 2); m < mend;) {
-        rngstep(a << 13, mm, m, m2, r, x, y);
-        rngstep(a >> 6, mm, m, m2, r, x, y);
-        rngstep(a << 2, mm, m, m2, r, x, y);
-        rngstep(a >> 16, mm, m, m2, r, x, y);
+        rngstep(a << 13, a, b, mm, m, m2, r, x, y);
+        rngstep(a >> 6, a, b, mm, m, m2, r, x, y);
+        rngstep(a << 2, a, b, mm, m, m2, r, x, y);
+        rngstep(a >> 16, a, b, mm, m, m2, r, x, y);
       }
       for (m2 = mm; m2 < mend;) {
-        rngstep(a << 13, mm, m, m2, r, x, y);
-        rngstep(a >> 6, mm, m, m2, r, x, y);
-        rngstep(a << 2, mm, m, m2, r, x, y);
-        rngstep(a >> 16, mm, m, m2, r, x, y);
+        rngstep(a << 13, a, b, mm, m, m2, r, x, y);
+        rngstep(a >> 6, a, b, mm, m, m2, r, x, y);
+        rngstep(a << 2, a, b, mm, m, m2, r, x, y);
+        rngstep(a >> 16, a, b, mm, m, m2, r, x, y);
       }
       randb = b;
       randa = a;
     }
 
-    void reset() {
-      a = b = c = d = e = f = g = h = GOLDEN_RATIO;
-      randa = randb = randc = 0;
-    }
-
     void randinit(const bool flag) {
+      uint32_t a, b, c, d, e, f, g, h;
+      a = b = c = d = e = f = g = h = GOLDEN_RATIO;
       size_t i;
       uint32_t *m = randmem, *r = randrsl;
+      randa = randb = randc = 0;
 
-      reset();
-
-      for (i = 0; i < 4; ++i) mix();
+      mix(a, b, c, d, e, f, g, h);
+      mix(a, b, c, d, e, f, g, h);
+      mix(a, b, c, d, e, f, g, h);
+      mix(a, b, c, d, e, f, g, h);
 
       if (flag) {
         for (i = 0; i < kRandSize; i += 8) {
@@ -124,7 +173,7 @@ namespace Isaac {
           f += r[i + 5];
           g += r[i + 6];
           h += r[i + 7];
-          mix();
+          mix(a, b, c, d, e, f, g, h);
           m[i] = a;
           m[i + 1] = b;
           m[i + 2] = c;
@@ -144,7 +193,7 @@ namespace Isaac {
           f += m[i + 5];
           g += m[i + 6];
           h += m[i + 7];
-          mix();
+          mix(a, b, c, d, e, f, g, h);
           m[i] = a;
           m[i + 1] = b;
           m[i + 2] = c;
@@ -156,7 +205,7 @@ namespace Isaac {
         }
       } else {
         for (i = 0; i < kRandSize; i += 8) {
-          mix();
+          mix(a, b, c, d, e, f, g, h);
           m[i] = a;
           m[i + 1] = b;
           m[i + 2] = c;
@@ -176,14 +225,15 @@ namespace Isaac {
       return *reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(mm) + (x & ((kRandSize - 1) << 2)));
     }
 
-    void rngstep(uint32_t mixit, uint32_t*& mm, uint32_t*& m, uint32_t*& m2, uint32_t*& r, uint32_t& x, uint32_t& y) {
+    void rngstep(uint32_t mixit, uint32_t& a, uint32_t& b, uint32_t*& mm, uint32_t*& m, uint32_t*& m2, uint32_t*& r, uint32_t& x,
+                 uint32_t& y) {
       x = *m;
       a = (a ^ (mixit)) + *(m2++);
       *(m++) = y = ind(mm, x) + a + b;
       *(r++) = b = ind(mm, y >> kRandSizeBits) + x;
     }
 
-    void mix() {
+    void mix(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d, uint32_t& e, uint32_t& f, uint32_t& g, uint32_t& h) {
       a ^= b << 11;
       d += a;
       b += c;
@@ -214,7 +264,7 @@ namespace Isaac {
     uint32_t randrsl[kRandSize];
     uint32_t randmem[kRandSize];
     uint32_t randa, randb, randc;
-    uint32_t a, b, c, d, e, f, g, h;
+    // uint32_t a, b, c, d, e, f, g, h;
 
     class FormatSaver {
      public:
@@ -226,35 +276,6 @@ namespace Isaac {
       std::ios state;
     };
   };
-
-  bool operator==(const Isaac& lhs, const Isaac& rhs) {
-    return lhs.randcnt == rhs.randcnt && lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c && lhs.d == rhs.d && lhs.e == rhs.e &&
-           lhs.f == rhs.f && lhs.g == rhs.g && lhs.h == rhs.h && lhs.randa == rhs.randa && lhs.randb == rhs.randb &&
-           lhs.randc == rhs.randc && std::equal(lhs.randrsl, lhs.randrsl + kRandSize, rhs.randrsl);
-  }
-
-  bool operator!=(const Isaac& lhs, const Isaac& rhs) { return !(lhs == rhs); }
-
-  std::ostream& operator<<(std::ostream& os, const Isaac& is) {
-    {
-      Isaac::FormatSaver saver(os);
-      os << std::setbase(16);
-      os.fill('0');
-      os << "      a: " << std::setw(8) << is.a << "\n";
-      os << "      b: " << std::setw(8) << is.b << "\n";
-      os << "      c: " << std::setw(8) << is.c << "\n";
-      os << "      d: " << std::setw(8) << is.d << "\n";
-      os << "      e: " << std::setw(8) << is.e << "\n";
-      os << "      f: " << std::setw(8) << is.f << "\n";
-      os << "      g: " << std::setw(8) << is.g << "\n";
-      os << "      h: " << std::setw(8) << is.h << "\n";
-      os << "  randa: " << std::setw(8) << is.randa << "\n";
-      os << "  randb: " << std::setw(8) << is.randb << "\n";
-      os << "  randc: " << std::setw(8) << is.randc << "\n";
-      os << "randcnt: " << std::setw(8) << is.randcnt << "\n";
-    }
-    return os;
-  }
 }  // namespace Isaac
 
 #endif
