@@ -79,3 +79,44 @@ TEST_CASE("First 2560 values with zero key match test vector (pass)", "[match-ze
 
   REQUIRE(std::equal(randVec.begin(), randVec.end(), testVec.begin()));
 }
+
+TEST_CASE("Copy construcor (pass])", "[copyctor]") {
+  IsaacEngine::IsaacEngine isa;
+  IsaacEngine::IsaacEngine isb(isa);
+
+  bool matches = true;
+
+  for (auto i = 0; i < 16; i++) {
+    matches &= (isa() == isb());
+  }
+
+  REQUIRE(matches);
+}
+
+TEST_CASE("Assignment operator (pass])", "[assign]") {
+  IsaacEngine::IsaacEngine isa;
+  IsaacEngine::IsaacEngine isb = isa;
+
+  bool matches = true;
+
+  for (auto i = 0; i < 16; i++) {
+    matches &= (isa() == isb());
+  }
+
+  REQUIRE(matches);
+}
+
+TEST_CASE("Assignment operator (fail])", "[assignbad]") {
+  IsaacEngine::IsaacEngine isa;
+  IsaacEngine::IsaacEngine isb = isa;
+
+  isb();
+
+  bool matches = true;
+
+  for (auto i = 0; i < 16; i++) {
+    matches &= (isa() == isb());
+  }
+
+  REQUIRE(!matches);
+}
