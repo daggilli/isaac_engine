@@ -62,7 +62,7 @@ namespace Isaac {
     friend std::istream& operator>>(std::istream& is, Isaac& isc) {
       is >> isc.randa >> isc.randb >> isc.randc;
       is >> isc.randcnt;
-      for (size_t i = 0; i < kRandSize; i++) is >> randrsl[i];
+      for (size_t i = 0; i < kRandSize; i++) is >> isc.randrsl[i];
       return is;
     }
     explicit Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
