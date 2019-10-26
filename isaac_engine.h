@@ -44,10 +44,29 @@ namespace IsaacEngine {
 
     IsaacEngine() : prng() {}
     IsaacEngine(std::random_device &rd) : prng(rd) {}
+    IsaacEngine(std::vector<uint32_t> &seedVec) : prng(seedVec.data(), seedVec.size()) {}
+    IsaacEngine(const std::string &seedStr) : prng(seedStr.data(), seedStr.length()) {}
+    IsaacEngine(const IsaacEngine &iseng) {
+      prng.randa = iseng.prng.randa;
+      prng.randb = iseng.prng.randb;
+      prng.randc = iseng.prng.randc;
+      prng.randcnt = iseng.prng.randcnt;
+      std::copy(iseng.prng.randrsl, iseng.prng.randrsl + Isaac::RANDOM_SEED_SIZE, prng.randrsl);
+    }
+    IsaacEngine &operator=(const IsaacEngine &iseng) {
+      if (this != &iseng) {
+        prng.randa = iseng.prng.randa;
+        prng.randb = iseng.prng.randb;
+        prng.randc = iseng.prng.randc;
+        prng.randcnt = iseng.prng.randcnt;
+        std::copy(iseng.prng.randrsl, iseng.prng.randrsl + Isaac::RANDOM_SEED_SIZE, prng.randrsl);
+      }
+      return *this;
+    }
 
     void seed() { prng.seed(static_cast<uint32_t *>(nullptr), 0); }
     void seed(std::random_device &rd) { prng.seed(rd); }
-    void seed(std::vector<uint32_t> &seedVec) { prng.seed(seedVec.data(), seedVec.size()); }
+    void seed(const std::vector<uint32_t> &seedVec) { prng.seed(seedVec.data(), seedVec.size()); }
     void seed(const std::string &seedStr) { prng.seed(seedStr.data(), seedStr.length()); }
     result_type operator()() { return prng.rand(); }
 
