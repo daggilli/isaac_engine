@@ -34,7 +34,7 @@
 #include <vector>
 #include "isaac.h"
 
-namespace IsaacEngine {
+namespace IsaacRNG {
   class IsaacEngine {
    public:
     friend std::ostream &operator<<(std::ostream &os, const IsaacEngine &is) { return os << is.prng; }
@@ -46,21 +46,11 @@ namespace IsaacEngine {
     IsaacEngine(std::random_device &rd) : prng(rd) {}
     IsaacEngine(std::vector<uint32_t> &seedVec) : prng(seedVec.data(), seedVec.size()) {}
     IsaacEngine(const std::string &seedStr) : prng(seedStr.data(), seedStr.length()) {}
-    IsaacEngine(const IsaacEngine &iseng) {
-      prng.randa = iseng.prng.randa;
-      prng.randb = iseng.prng.randb;
-      prng.randc = iseng.prng.randc;
-      prng.randcnt = iseng.prng.randcnt;
-      std::copy(iseng.prng.randrsl, iseng.prng.randrsl + Isaac::RANDOM_SEED_SIZE, prng.randrsl);
-    }
+    IsaacEngine(const IsaacEngine &iseng) : prng(iseng.prng) {}
+
     IsaacEngine &operator=(const IsaacEngine &iseng) {
-      if (this != &iseng) {
-        prng.randa = iseng.prng.randa;
-        prng.randb = iseng.prng.randb;
-        prng.randc = iseng.prng.randc;
-        prng.randcnt = iseng.prng.randcnt;
-        std::copy(iseng.prng.randrsl, iseng.prng.randrsl + Isaac::RANDOM_SEED_SIZE, prng.randrsl);
-      }
+      if (this != &iseng) prng = iseng.prng;
+
       return *this;
     }
 
@@ -79,7 +69,7 @@ namespace IsaacEngine {
     }
 
    private:
-    Isaac::Isaac prng;
+    Isaac prng;
   };
-}  // namespace IsaacEngine
+}  // namespace IsaacRNG
 #endif

@@ -22,13 +22,13 @@
 // g++ -std=c++11 -Wall -o isaac_engine.test isaac_engine.test.cpp
 
 TEST_CASE("Single random value from engine with zero key (pass)", "[single]") {
-  IsaacEngine::IsaacEngine engine;
+  IsaacRNG::IsaacEngine engine;
   REQUIRE(engine() == 0x182600f3);
 }
 
 TEST_CASE("First 2560 values with known key match test vector (pass)", "[match-test]") {
   std::vector<uint32_t> randVec;
-  IsaacEngine::IsaacEngine iseng;
+  IsaacRNG::IsaacEngine iseng;
 
   iseng.seed("This is <i>not</i> the right mytext.");
 
@@ -56,7 +56,7 @@ TEST_CASE("First 2560 values with known key match test vector (pass)", "[match-t
 
 TEST_CASE("First 2560 values with zero key match test vector (pass)", "[match-zero]") {
   std::vector<uint32_t> randVec;
-  IsaacEngine::IsaacEngine iseng;
+  IsaacRNG::IsaacEngine iseng;
 
   for (auto i = 0; i < 320; i++) {
     for (auto j = 0; j < 8; j++) {
@@ -81,8 +81,8 @@ TEST_CASE("First 2560 values with zero key match test vector (pass)", "[match-ze
 }
 
 TEST_CASE("Copy construcor (pass])", "[copyctor]") {
-  IsaacEngine::IsaacEngine isa;
-  IsaacEngine::IsaacEngine isb(isa);
+  IsaacRNG::IsaacEngine isa;
+  IsaacRNG::IsaacEngine isb(isa);
 
   bool matches = true;
 
@@ -94,8 +94,8 @@ TEST_CASE("Copy construcor (pass])", "[copyctor]") {
 }
 
 TEST_CASE("Assignment operator (pass])", "[assign]") {
-  IsaacEngine::IsaacEngine isa;
-  IsaacEngine::IsaacEngine isb = isa;
+  IsaacRNG::IsaacEngine isa;
+  IsaacRNG::IsaacEngine isb = isa;
 
   bool matches = true;
 
@@ -107,8 +107,8 @@ TEST_CASE("Assignment operator (pass])", "[assign]") {
 }
 
 TEST_CASE("Assignment operator (fail])", "[assignbad]") {
-  IsaacEngine::IsaacEngine isa;
-  IsaacEngine::IsaacEngine isb = isa;
+  IsaacRNG::IsaacEngine isa;
+  IsaacRNG::IsaacEngine isb = isa;
 
   isb();
 
