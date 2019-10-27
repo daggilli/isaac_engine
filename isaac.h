@@ -42,7 +42,7 @@ namespace {
   const uint32_t GOLDEN_RATIO = 0x9e3779b9;
 }
 
-namespace Isaac {
+namespace IsaacRNG {
   const uint32_t kRandSizeBits = 8;
   const std::size_t kRandSize = 1 << kRandSizeBits;
   const std::size_t RANDOM_SEED_SIZE = kRandSize;  // alias for use in user programs
@@ -70,6 +70,24 @@ namespace Isaac {
     Isaac(const uint32_t* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
     Isaac(const char* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
     Isaac(std::random_device& rd) { seed(rd); }
+    Isaac(const Isaac& isa) {
+      randa = isa.randa;
+      randb = isa.randb;
+      randc = isa.randc;
+      randcnt = isa.randcnt;
+      std::copy(isa.randrsl, isa.randrsl + kRandSize, randrsl);
+    }
+
+    Isaac& operator=(const Isaac& isa) {
+      if (this != &isa) {
+        randa = isa.randa;
+        randb = isa.randb;
+        randc = isa.randc;
+        randcnt = isa.randcnt;
+        std::copy(isa.randrsl, isa.randrsl + kRandSize, randrsl);
+      }
+      return *this;
+    }
 
     void seed(const uint32_t* const seedArr, const std::size_t seedlen) {
       std::fill(randrsl, randrsl + kRandSize, 0);
@@ -276,6 +294,6 @@ namespace Isaac {
       std::ios state;
     };
   };
-}  // namespace Isaac
+}  // namespace IsaacRNG
 
 #endif
