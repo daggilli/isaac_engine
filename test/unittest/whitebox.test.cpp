@@ -18,7 +18,7 @@
 #include "../../isaac_engine.h"
 
 TEST_CASE("Isaac internal seed vector matches after two rounds with zero seed (pass)", "[internal]") {
-  Isaac::Isaac isa;
+  IsaacRNG::Isaac isa;
 
   std::ostringstream outStr;
 
@@ -43,10 +43,10 @@ TEST_CASE("Isaac internal seed vector matches after two rounds with zero seed (p
 }
 
 TEST_CASE("Isaac internal seed vector matches reference with known key (pass)", "[keytest]") {
-  Isaac::Isaac isa("This is <i>not</i> the right mytext.", 36);
+  IsaacRNG::Isaac isa("This is <i>not</i> the right mytext.", 36);
 
   std::vector<uint32_t> seedVec;
-  std::copy(isa.randrsl, isa.randrsl + Isaac::RANDOM_SEED_SIZE, std::back_inserter(seedVec));
+  std::copy(isa.randrsl, isa.randrsl + IsaacRNG::RANDOM_SEED_SIZE, std::back_inserter(seedVec));
 
   std::vector<uint32_t> testVec;
 
@@ -66,15 +66,15 @@ TEST_CASE("Isaac internal seed vector matches reference with known key (pass)", 
 TEST_CASE("Construct an Isaac engine with a random device (pass)", "[randeviceconstruct]") {
   std::random_device rd;
 
-  IsaacEngine::IsaacEngine isasrd(rd);
+  IsaacRNG::IsaacEngine isasrd(rd);
 
   std::vector<uint32_t> randVec;
-  for (uint32_t i = 0; i < Isaac::RANDOM_SEED_SIZE; i++) {
+  for (uint32_t i = 0; i < IsaacRNG::RANDOM_SEED_SIZE; i++) {
     randVec.emplace_back(isasrd.prng.randrsl[i]);
   }
 
   std::vector<uint32_t> testVec;
-  testVec.reserve(Isaac::RANDOM_SEED_SIZE);
+  testVec.reserve(IsaacRNG::RANDOM_SEED_SIZE);
 
   std::ifstream randfile("../testvectors/zerovect.txt");
   std::string line;
@@ -92,16 +92,16 @@ TEST_CASE("Construct an Isaac engine with a random device (pass)", "[randeviceco
 
 TEST_CASE("Construct an Isaac engine with a vector of uint32_t (pass)", "[intvecconstruct]") {
   std::vector<uint32_t> seedVec;
-  seedVec.reserve(Isaac::RANDOM_SEED_SIZE);
+  seedVec.reserve(IsaacRNG::RANDOM_SEED_SIZE);
 
-  for (size_t i = 0; i < Isaac::RANDOM_SEED_SIZE; i++) {
+  for (size_t i = 0; i < IsaacRNG::RANDOM_SEED_SIZE; i++) {
     seedVec.emplace_back(0xDEADBEEF + i);
   }
 
-  IsaacEngine::IsaacEngine isaiv(seedVec);
+  IsaacRNG::IsaacEngine isaiv(seedVec);
 
   std::vector<uint32_t> randVec;
-  for (uint32_t i = 0; i < Isaac::RANDOM_SEED_SIZE; i++) {
+  for (uint32_t i = 0; i < IsaacRNG::RANDOM_SEED_SIZE; i++) {
     randVec.emplace_back(isaiv.prng.randrsl[i]);
   }
 
@@ -121,10 +121,10 @@ TEST_CASE("Construct an Isaac engine with a vector of uint32_t (pass)", "[intvec
 }
 
 TEST_CASE("Construct an Isaac engine with a string (pass)", "[stringconstruct]") {
-  IsaacEngine::IsaacEngine isaiv(std::string("Sphinx of black quartz, judge my vow"));
+  IsaacRNG::IsaacEngine isaiv(std::string("Sphinx of black quartz, judge my vow"));
 
   std::vector<uint32_t> randVec;
-  for (uint32_t i = 0; i < Isaac::RANDOM_SEED_SIZE; i++) {
+  for (uint32_t i = 0; i < IsaacRNG::RANDOM_SEED_SIZE; i++) {
     randVec.emplace_back(isaiv.prng.randrsl[i]);
   }
 
@@ -146,17 +146,17 @@ TEST_CASE("Construct an Isaac engine with a string (pass)", "[stringconstruct]")
 TEST_CASE("Seed an Isaac engine with a random device (pass)", "[randeviceseed]") {
   std::random_device rd;
 
-  IsaacEngine::IsaacEngine isasrd;
+  IsaacRNG::IsaacEngine isasrd;
 
   isasrd.seed(rd);
 
   std::vector<uint32_t> randVec;
-  for (uint32_t i = 0; i < Isaac::RANDOM_SEED_SIZE; i++) {
+  for (uint32_t i = 0; i < IsaacRNG::RANDOM_SEED_SIZE; i++) {
     randVec.emplace_back(isasrd.prng.randrsl[i]);
   }
 
   std::vector<uint32_t> testVec;
-  testVec.reserve(Isaac::RANDOM_SEED_SIZE);
+  testVec.reserve(IsaacRNG::RANDOM_SEED_SIZE);
 
   std::ifstream randfile("../testvectors/zerovect.txt");
   std::string line;
@@ -174,18 +174,18 @@ TEST_CASE("Seed an Isaac engine with a random device (pass)", "[randeviceseed]")
 
 TEST_CASE("Seed an Isaac engine with a vector of uint32_t (pass)", "[intvecseed]") {
   std::vector<uint32_t> seedVec;
-  seedVec.reserve(Isaac::RANDOM_SEED_SIZE);
+  seedVec.reserve(IsaacRNG::RANDOM_SEED_SIZE);
 
-  for (size_t i = 0; i < Isaac::RANDOM_SEED_SIZE; i++) {
+  for (size_t i = 0; i < IsaacRNG::RANDOM_SEED_SIZE; i++) {
     seedVec.emplace_back(0xDEADBEEF + i);
   }
 
-  IsaacEngine::IsaacEngine isaiv;
+  IsaacRNG::IsaacEngine isaiv;
 
   isaiv.seed(seedVec);
 
   std::vector<uint32_t> randVec;
-  for (uint32_t i = 0; i < Isaac::RANDOM_SEED_SIZE; i++) {
+  for (uint32_t i = 0; i < IsaacRNG::RANDOM_SEED_SIZE; i++) {
     randVec.emplace_back(isaiv.prng.randrsl[i]);
   }
 
@@ -205,12 +205,12 @@ TEST_CASE("Seed an Isaac engine with a vector of uint32_t (pass)", "[intvecseed]
 }
 
 TEST_CASE("Seed an Isaac engine with a string (pass)", "[stringseed]") {
-  IsaacEngine::IsaacEngine isas;
+  IsaacRNG::IsaacEngine isas;
 
   isas.seed(std::string("Sphinx of black quartz, judge my vow"));
 
   std::vector<uint32_t> randVec;
-  for (uint32_t i = 0; i < Isaac::RANDOM_SEED_SIZE; i++) {
+  for (uint32_t i = 0; i < IsaacRNG::RANDOM_SEED_SIZE; i++) {
     randVec.emplace_back(isas.prng.randrsl[i]);
   }
 
