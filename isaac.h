@@ -65,8 +65,7 @@ namespace IsaacRNG {
       for (size_t i = 0; i < kRandSize; i++) is >> isc.randrsl[i];
       return is;
     }
-    explicit Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
-
+    Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
     Isaac(const uint32_t* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
     Isaac(const char* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
     Isaac(std::random_device& rd) { seed(rd); }
@@ -89,6 +88,8 @@ namespace IsaacRNG {
       return *this;
     }
 
+    void seed() { seed(static_cast<uint32_t*>(nullptr), 0); }
+
     void seed(const uint32_t* const seedArr, const std::size_t seedlen) {
       std::fill(randrsl, randrsl + kRandSize, 0);
       if (seedArr != nullptr) {
@@ -109,10 +110,6 @@ namespace IsaacRNG {
 
     void seed(std::random_device& rd) {
       std::generate(randrsl, randrsl + kRandSize, [&rd]() -> uint32_t { return static_cast<uint32_t>(rd()); });
-      /* std::cout << std::setbase(16);
-      for (uint32_t i = 0; i < RANDOM_SEED_SIZE; i++) {
-        std::cout << std::setw(8) << std::setfill('0') << randrsl[i] << "\n";
-      } */
       randinit(true);
     }
 
