@@ -36,6 +36,7 @@
 #else
 #include <random>
 #endif
+#include <memory>
 
 static_assert(__cplusplus >= 201402L, "C++ version must be C++14 or greater");
 
@@ -75,7 +76,7 @@ namespace IsaacRNG {
       randb = isa.randb;
       randc = isa.randc;
       randcnt = isa.randcnt;
-      std::copy(isa.randrsl, isa.randrsl + kRandSize, randrsl);
+      std::copy(isa.randrsl.get(), isa.randrsl.get() + kRandSize, randrsl.get());
     }
     Isaac(Isaac&& isa) noexcept
         : randa(std::exchange(isa.randa, 0)),
@@ -84,14 +85,14 @@ namespace IsaacRNG {
           randcnt(std::exchange(isa.randcnt, 0)),
           randrsl(std::exchange(isa.randrsl, nullptr)) {}
 
-    ~Isaac() { delete[] randrsl; }
+    ~Isaac() {}
     Isaac& operator=(const Isaac& isa) {
       if (this != &isa) {
         randa = isa.randa;
         randb = isa.randb;
         randc = isa.randc;
         randcnt = isa.randcnt;
-        std::copy(isa.randrsl, isa.randrsl + kRandSize, randrsl);
+        std::copy(isa.randrsl.get(), isa.randrsl.get() + kRandSize, randrsl.get());
       }
       return *this;
     }
@@ -101,33 +102,32 @@ namespace IsaacRNG {
         randb = std::exchange(isa.randb, 0);
         randc = std::exchange(isa.randc, 0);
         randcnt = std::exchange(isa.randcnt, 0);
-        delete[] randrsl;
-        randrsl = std::exchange(isa.randrsl, nullptr);
+        randrsl = std::move(isa.randrsl);
       }
       return *this;
     }
     void seed() { seed(static_cast<uint32_t*>(nullptr), 0); }
 
     void seed(const uint32_t* const seedArr, const std::size_t seedlen) {
-      std::fill(randrsl, randrsl + kRandSize, 0);
+      std::fill(randrsl.get(), randrsl.get() + kRandSize, 0);
       if (seedArr != nullptr) {
         std::size_t tlen = std::min(seedlen, kRandSize);
-        std::copy(seedArr, seedArr + tlen, randrsl);
+        std::copy(seedArr, seedArr + tlen, randrsl.get());
       }
       randinit(true);
     }
 
     void seed(const char* const seedArr, const std::size_t seedlen) {
-      std::fill(randrsl, randrsl + kRandSize, 0);
+      std::fill(randrsl.get(), randrsl.get() + kRandSize, 0);
       if (seedArr != nullptr) {
         std::size_t tlen = std::min(seedlen, kRandSize * sizeof(uint32_t));
-        std::memcpy(reinterpret_cast<char*>(randrsl), seedArr, tlen);
+        std::memcpy(reinterpret_cast<char*>(randrsl.get()), seedArr, tlen);
       }
       randinit(true);
     }
 
     void seed(std::random_device& rd) {
-      std::generate(randrsl, randrsl + kRandSize, [&rd]() -> uint32_t { return static_cast<uint32_t>(rd()); });
+      std::generate(randrsl.get(), randrsl.get() + kRandSize, [&rd]() -> uint32_t { return static_cast<uint32_t>(rd()); });
       randinit(true);
     }
 
@@ -137,7 +137,7 @@ namespace IsaacRNG {
         randb = isa.randb;
         randc = isa.randc;
         randcnt = isa.randcnt;
-        std::copy(isa.randrsl, isa.randrsl + kRandSize, randrsl);
+        std::copy(isa.randrsl.get(), isa.randrsl.get() + kRandSize, randrsl.get());
       }
     }
 
@@ -151,7 +151,7 @@ namespace IsaacRNG {
 
     bool operator==(const Isaac& rhs) {
       return randcnt == rhs.randcnt && randa == rhs.randa && randb == rhs.randb && randc == rhs.randc &&
-             std::equal(randrsl, randrsl + kRandSize, rhs.randrsl);
+             std::equal(randrsl.get(), randrsl.get() + kRandSize, rhs.randrsl.get());
     }
 
     bool operator!=(const Isaac& rhs) { return !(*this == rhs); }
@@ -191,7 +191,7 @@ namespace IsaacRNG {
       uint32_t a, b, x, y, *m, *mm, *m2, *r, *mend;
 
       mm = randmem;
-      r = randrsl;
+      r = randrsl.get();
       a = randa;
       b = randb + (++randc);
       for (m = mm, mend = m2 = m + (kRandSize / 2); m < mend;) {
@@ -214,7 +214,7 @@ namespace IsaacRNG {
       uint32_t a, b, c, d, e, f, g, h;
       a = b = c = d = e = f = g = h = GOLDEN_RATIO;
       size_t i;
-      uint32_t *m = randmem, *r = randrsl;
+      uint32_t *m = randmem, *r = randrsl.get();
       randa = randb = randc = 0;
 
       mix(a, b, c, d, e, f, g, h);
@@ -323,7 +323,8 @@ namespace IsaacRNG {
     uint32_t randa, randb, randc;
     uint32_t randcnt;
     // uint32_t randrsl[kRandSize];
-    uint32_t* randrsl;
+    // uint32_t* randrsl;
+    std::unique_ptr<uint32_t[]> randrsl;
 
     class FormatSaver {
      public:
