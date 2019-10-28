@@ -48,9 +48,15 @@ namespace IsaacRNG {
     IsaacEngine(const std::vector<uint32_t> &seedVec) : prng(seedVec.data(), seedVec.size()) {}
     IsaacEngine(const std::string &seedStr) : prng(seedStr.data(), seedStr.length()) {}
     IsaacEngine(const IsaacEngine &iseng) : prng(iseng.prng) {}
+    IsaacEngine(IsaacEngine &&iseng) : prng(std::move(iseng.prng)) {}
 
     IsaacEngine &operator=(const IsaacEngine &iseng) {
       if (this != &iseng) prng = iseng.prng;
+
+      return *this;
+    }
+    IsaacEngine &operator=(IsaacEngine &&iseng) {
+      if (this != &iseng) prng = std::move(iseng.prng);
 
       return *this;
     }
@@ -59,6 +65,10 @@ namespace IsaacRNG {
     void seed(std::random_device &rd) { prng.seed(rd); }
     void seed(const std::vector<uint32_t> &seedVec) { prng.seed(seedVec.data(), seedVec.size()); }
     void seed(const std::string &seedStr) { prng.seed(seedStr.data(), seedStr.length()); }
+    void seed(const IsaacEngine &iseng) {
+      if (this != &iseng) prng.seed(iseng.prng);
+    }
+
     result_type operator()() { return prng.rand(); }
 
     bool operator==(const IsaacEngine &rhs) { return prng == rhs.prng; }
