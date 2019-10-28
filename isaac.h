@@ -17,8 +17,8 @@
 
   --
 
-  N.B. a C++ compiler capable of generating C++11 compliant
-  code is REQUIRED. g++ 4.7 will work, although g++ 4.8 or higher
+  N.B. a C++ compiler capable of generating C++14 compliant
+  code is REQUIRED. g++ 5 will work, although g++ 6.1 or higher
   is preferred.
 
 **********************************************************************************/
