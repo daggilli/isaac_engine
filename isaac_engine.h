@@ -48,14 +48,14 @@ namespace IsaacRNG {
     IsaacEngine(const std::vector<uint32_t> &seedVec) : prng(seedVec.data(), seedVec.size()) {}
     IsaacEngine(const std::string &seedStr) : prng(seedStr.data(), seedStr.length()) {}
     IsaacEngine(const IsaacEngine &iseng) : prng(iseng.prng) {}
-    IsaacEngine(IsaacEngine &&iseng) : prng(std::move(iseng.prng)) {}
+    IsaacEngine(IsaacEngine &&iseng) noexcept : prng(std::move(iseng.prng)) {}
 
     IsaacEngine &operator=(const IsaacEngine &iseng) {
       if (this != &iseng) prng = iseng.prng;
 
       return *this;
     }
-    IsaacEngine &operator=(IsaacEngine &&iseng) {
+    IsaacEngine &operator=(IsaacEngine &&iseng) noexcept {
       if (this != &iseng) prng = std::move(iseng.prng);
 
       return *this;
