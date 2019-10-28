@@ -2,7 +2,7 @@ TEST = isaac_engine.test
 
 CXX = g++
 OUTPUT_OPTION = -MMD -MP -o $@
-CXXFLAGS := --std=c++11 -Wall -Wconversion -Werror -MMD
+CXXFLAGS := --std=c++14 -Wall -Wconversion -Werror -MMD
 
 SRCTOP=.
 OBJDIR=obj
