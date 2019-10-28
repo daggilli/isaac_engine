@@ -44,7 +44,7 @@ namespace IsaacRNG {
 
     IsaacEngine() : prng() {}
     IsaacEngine(std::random_device &rd) : prng(rd) {}
-    IsaacEngine(std::vector<uint32_t> &seedVec) : prng(seedVec.data(), seedVec.size()) {}
+    IsaacEngine(const std::vector<uint32_t> &seedVec) : prng(seedVec.data(), seedVec.size()) {}
     IsaacEngine(const std::string &seedStr) : prng(seedStr.data(), seedStr.length()) {}
     IsaacEngine(const IsaacEngine &iseng) : prng(iseng.prng) {}
 
