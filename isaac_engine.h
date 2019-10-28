@@ -37,7 +37,8 @@
 namespace IsaacRNG {
   class IsaacEngine {
    public:
-    friend std::ostream &operator<<(std::ostream &os, const IsaacEngine &is) { return os << is.prng; }
+    friend std::ostream &operator<<(std::ostream &os, const IsaacEngine &ise) { return os << ise.prng; }
+    friend std::istream &operator>>(std::istream &is, IsaacEngine &ise) { return is >> ise.prng; }
     using result_type = uint32_t;
     static constexpr result_type(min)() { return 0; }
     static constexpr result_type(max)() { return UINT32_MAX; }
