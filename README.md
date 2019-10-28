@@ -40,7 +40,7 @@ std::random_device rd;
 
 IsaacRNG::IsaacEngine isengrd(rd);
 
-std::cout << isrd.rand() << "\n";
+std::cout << isengrd() << "\n";
 ```
 ### Further details
 Both `Isaac` and `IsaacEngine` can be seeded on construction and re-seeded later with the `::seed()` function. Seeding either class with a known key will cause the same sequence of values to be emitted. Acceptable seeds at construction are:
