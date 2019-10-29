@@ -4,4 +4,5 @@ isaac_engine
 .vscode
 isaac_test_harness
 isaac_test_harness.cpp
+example
 test/unittest/isaac_engine.test
