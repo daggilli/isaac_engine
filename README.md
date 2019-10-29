@@ -59,9 +59,10 @@ In both cases, the random number generator can be reseeded (`IsaacRNG::Isaac::se
 
 In addition, both classes have an empty constructor (without parameters) that initialises the internal seed to an array of 256 32-bit integers of value zero. Passing `nullptr` or a zero length seed vector/string/array to the other constructors will have the same effect. Similarly, calling `::seed()` with no parameters resets the seed to an array of zeroes.
 
-Both classes have a copy constructor to create a new instance from an existing one. They also implement the assignment operator `operator=` so that the value of one instance can be assigned to another.
+Both classes have a copy constructor to create a new instance from an existing one. They also implement the assignment operator `operator=` so that the value of one instance can be assigned to another. Additionally, there are move constructors and move assignment operators in both cases.
 
 ### Example code
+This code is found in [example.cpp](example.cpp)
 ```c++
 #include <cstdint>
 #include <cstring>
@@ -74,7 +75,7 @@ Both classes have a copy constructor to create a new instance from an existing o
 #include "isaac_engine.h"
 
 int main() {
-  IsaacRNG::Isaac iscDefault; // empty ctor - seed all zeroes
+  IsaacRNG::Isaac iscDefault;  // empty ctor - seed all zeroes
 
   // draw one random value - should see 182600f3
   std::cout << std::setfill('0') << std::hex << std::setw(8) << iscDefault.rand() << "\n";
@@ -94,8 +95,16 @@ int main() {
   // copy ctor
   IsaacRNG::Isaac iscCopy(iscUint);
 
+  // move ctor - iscRanDev is now invalid
+  IsaacRNG::Isaac iscMove(std::move(iscRanDev));
+
   // assign
   iscDefault = iscString;
+
+  IsaacRNG::Isaac iscToBeMoved;
+
+  // move assign - isengToBeMoved is now invalid
+  IsaacRNG::Isaac iscMoveAssign = std::move(iscToBeMoved);
 
   // equality
   std::cout << std::boolalpha << (iscDefault == iscString) << "\n";
@@ -108,13 +117,15 @@ int main() {
   iscDefault.seed("The five boxing wizards jump quickly", 36);
   iscDefault.seed(uintSeed, 3);
   iscUint.seed(rd);
-  iscString.seed(); // all zeroes
+  iscString.seed();  // all zeroes
 
   // I/O
   std::cout << iscUint << "\n";
+
+  // provide randa, randdb, randc, randcnt and 256 uint32_t seed values
   std::cin >> iscString;
 
-  IsaacRNG::IsaacEngine isengDefault; // empty ctor - seed all zeroes
+  IsaacRNG::IsaacEngine isengDefault;  // empty ctor - seed all zeroes
 
   // draw one random value - should see 182600f3
   std::cout << std::setfill('0') << std::hex << std::setw(8) << isengDefault() << "\n";
@@ -126,15 +137,23 @@ int main() {
   // vector<uint32_t> ctor
   const std::vector<uint32_t> uintVecSeed = {0xDEADBEEF, 0xCABBAFEE, 0xA5A5A5A5};
   IsaacRNG::IsaacEngine isengUint(uintVecSeed);
-  
+
   // random_device ctor
   IsaacRNG::IsaacEngine isengRanDev(rd);
 
   // copy ctor
   IsaacRNG::IsaacEngine isengCopy(isengUint);
 
+  // move ctor - isengRanDev is now invalid
+  IsaacRNG::IsaacEngine isengMove(std::move(isengRanDev));
+
   // assign
   isengDefault = isengString;
+
+  IsaacRNG::IsaacEngine isengToBeMoved;
+
+  // move assign - isengToBeMoved is now invalid
+  IsaacRNG::IsaacEngine isengMoveAssign = std::move(isengToBeMoved);
 
   // equality
   std::cout << std::boolalpha << (isengDefault == isengString) << "\n";
@@ -147,12 +166,14 @@ int main() {
   isengDefault.seed("Jack quietly moved up front and seized the big ball of wax");
   isengDefault.seed(uintVecSeed);
   isengUint.seed(rd);
-  isengString.seed(); // all zeroes
+  isengString.seed();  // all zeroes
 
   // I/O
   std::cout << isengUint << "\n";
+
+  // provide randa, randdb, randc, randcnt and 256 uint32_t seed values
   std::cin >> isengString;
-  
+
   // advance the state of the RNG by n (n = 5 here) iterations
   isengString.discard(5);
 
@@ -174,7 +195,7 @@ int main() {
 ```
 
 ### Testing
-Tests are found in the `test` directory. The directory `test/unittest` contains unit and whitebox tests.
+Tests are found in the [test](test) directory. The directory [test/unittest](test/unittest) contains unit and whitebox tests.
 
 This project uses the [Catch2](https://github.com/catchorg/Catch2) library for testing. The `catch.hpp` include file will need to be in your compiler's include path. Catch is available as a package for Debian-like Linux distros and as a Homebrew formula (catch2) for macos, among others.
 
