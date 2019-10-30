@@ -110,7 +110,7 @@ TEST_CASE("Assignment operator (fail])", "[assignbad]") {
   IsaacRNG::IsaacEngine isa;
   IsaacRNG::IsaacEngine isb = isa;
 
-  isb();
+  isb.discard(1);
 
   bool matches = true;
 

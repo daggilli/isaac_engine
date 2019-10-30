@@ -17,8 +17,8 @@
 
   --
 
-  N.B. a C++ compiler capable of generating C++11 compliant
-  code is REQUIRED. g++ 4.7 will work, although g++ 4.8 or higher
+  N.B. a C++ compiler capable of generating C++14 compliant
+  code is REQUIRED. g++ 5 will work, although g++ 6.1 or higher
   is preferred.
 
 **********************************************************************************/
@@ -30,13 +30,14 @@
 #include <cstring>
 #include <iomanip>
 #include <ios>
+#include <utility>
 #ifdef __USE_MOCKRANDOM__
 #include "test/unittest/mockrandom.h"
 #else
 #include <random>
 #endif
 
-static_assert(__cplusplus >= 201103, "C++ version must be C++11 or greater");
+static_assert(__cplusplus >= 201402L, "C++ version must be C++14 or greater");
 
 namespace {
   const uint32_t GOLDEN_RATIO = 0x9e3779b9;
@@ -66,17 +67,24 @@ namespace IsaacRNG {
       return is;
     }
     Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
-    Isaac(const uint32_t* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
-    Isaac(const char* const seedArr, const std::size_t seedlen) { seed(seedArr, seedlen); }
-    Isaac(std::random_device& rd) { seed(rd); }
-    Isaac(const Isaac& isa) {
+    Isaac(const uint32_t* const seedArr, const std::size_t seedlen) : randrsl(new uint32_t[kRandSize]) { seed(seedArr, seedlen); }
+    Isaac(const char* const seedArr, const std::size_t seedlen) : randrsl(new uint32_t[kRandSize]) { seed(seedArr, seedlen); }
+    Isaac(std::random_device& rd) : randrsl(new uint32_t[kRandSize]) { seed(rd); }
+    Isaac(const Isaac& isa) : randrsl(new uint32_t[kRandSize]) {
       randa = isa.randa;
       randb = isa.randb;
       randc = isa.randc;
       randcnt = isa.randcnt;
       std::copy(isa.randrsl, isa.randrsl + kRandSize, randrsl);
     }
+    Isaac(Isaac&& isa) noexcept
+        : randa(std::exchange(isa.randa, 0)),
+          randb(std::exchange(isa.randb, 0)),
+          randc(std::exchange(isa.randc, 0)),
+          randcnt(std::exchange(isa.randcnt, 0)),
+          randrsl(std::exchange(isa.randrsl, nullptr)) {}
 
+    ~Isaac() { delete[] randrsl; }
     Isaac& operator=(const Isaac& isa) {
       if (this != &isa) {
         randa = isa.randa;
@@ -87,7 +95,17 @@ namespace IsaacRNG {
       }
       return *this;
     }
-
+    Isaac& operator=(Isaac&& isa) noexcept {
+      if (this != &isa) {
+        randa = std::exchange(isa.randa, 0);
+        randb = std::exchange(isa.randb, 0);
+        randc = std::exchange(isa.randc, 0);
+        randcnt = std::exchange(isa.randcnt, 0);
+        delete[] randrsl;
+        randrsl = std::exchange(isa.randrsl, nullptr);
+      }
+      return *this;
+    }
     void seed() { seed(static_cast<uint32_t*>(nullptr), 0); }
 
     void seed(const uint32_t* const seedArr, const std::size_t seedlen) {
@@ -111,6 +129,16 @@ namespace IsaacRNG {
     void seed(std::random_device& rd) {
       std::generate(randrsl, randrsl + kRandSize, [&rd]() -> uint32_t { return static_cast<uint32_t>(rd()); });
       randinit(true);
+    }
+
+    void seed(const Isaac& isa) {
+      if (this != &isa) {
+        randa = isa.randa;
+        randb = isa.randb;
+        randc = isa.randc;
+        randcnt = isa.randcnt;
+        std::copy(isa.randrsl, isa.randrsl + kRandSize, randrsl);
+      }
     }
 
     uint32_t rand() {
@@ -137,6 +165,22 @@ namespace IsaacRNG {
       outStr << "  randb: " << std::setw(8) << randb << "\n";
       outStr << "  randc: " << std::setw(8) << randc << "\n";
       outStr << "randcnt: " << std::setw(8) << randcnt << "\n";
+      outStr << "randrsl: ";
+      if (randrsl != nullptr) {
+        std::string sep, pad;
+
+        for (size_t i = 0; i < kRandSize / 8; i++) {
+          sep = "";
+          outStr << pad;
+          for (size_t j = 0; j < 8; j++) {
+            outStr << sep << std::setw(8) << randrsl[i * 8 + j];
+            sep = " ";
+          }
+          outStr << "\n";
+          pad = "         ";
+        }
+      } else
+        outStr << "null\n";
 
       return outStr.str();
       ;
@@ -275,11 +319,11 @@ namespace IsaacRNG {
       a += b;
     }
 
-    uint32_t randcnt;
-    uint32_t randrsl[kRandSize];
     uint32_t randmem[kRandSize];
     uint32_t randa, randb, randc;
-    // uint32_t a, b, c, d, e, f, g, h;
+    uint32_t randcnt;
+    // uint32_t randrsl[kRandSize];
+    uint32_t* randrsl;
 
     class FormatSaver {
      public:

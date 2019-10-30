@@ -143,6 +143,40 @@ TEST_CASE("Construct an Isaac engine with a string (pass)", "[stringconstruct]")
   REQUIRE(std::equal(randVec.begin(), randVec.end(), testVec.rbegin()));
 }
 
+TEST_CASE("Construct an Isaac engine from another one (pass)", "[engcopyconstruct]") {
+  IsaacRNG::IsaacEngine isa;
+  IsaacRNG::IsaacEngine isb(isa);
+
+  REQUIRE(std::equal(isa.prng.randrsl, isa.prng.randrsl + IsaacRNG::RANDOM_SEED_SIZE, isb.prng.randrsl));
+  REQUIRE(isa.prng.randa == isb.prng.randa);
+  REQUIRE(isa.prng.randb == isb.prng.randb);
+  REQUIRE(isa.prng.randc == isb.prng.randc);
+  REQUIRE(isa.prng.randcnt == isb.prng.randcnt);
+}
+
+TEST_CASE("Move construct an Isaac engine from another one (pass)", "[engmoveconstruct]") {
+  IsaacRNG::IsaacEngine isa;
+  uint32_t ra = isa.prng.randa, rb = isa.prng.randb, rc = isa.prng.randc, rcnt = isa.prng.randcnt;
+
+  uint32_t *rsl = new uint32_t[IsaacRNG::RANDOM_SEED_SIZE];
+  std::copy(isa.prng.randrsl, isa.prng.randrsl + IsaacRNG::RANDOM_SEED_SIZE, rsl);
+
+  IsaacRNG::IsaacEngine isb(std::move(isa));
+
+  REQUIRE(std::equal(isb.prng.randrsl, isb.prng.randrsl + IsaacRNG::RANDOM_SEED_SIZE, rsl));
+  REQUIRE(isa.prng.randa == 0);
+  REQUIRE(isa.prng.randb == 0);
+  REQUIRE(isa.prng.randc == 0);
+  REQUIRE(isa.prng.randcnt == 0);
+  REQUIRE(isa.prng.randrsl == nullptr);
+  REQUIRE(isb.prng.randa == ra);
+  REQUIRE(isb.prng.randb == rb);
+  REQUIRE(isb.prng.randc == rc);
+  REQUIRE(isb.prng.randcnt == rcnt);
+
+  delete[] rsl;
+}
+
 TEST_CASE("Seed an Isaac engine with a random device (pass)", "[randeviceseed]") {
   std::random_device rd;
 

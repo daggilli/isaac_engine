@@ -2,7 +2,18 @@ TEST = isaac_engine.test
 
 CXX = g++
 OUTPUT_OPTION = -MMD -MP -o $@
-CXXFLAGS := --std=c++11 -Wall -Wconversion -Werror -MMD
+CXXFLAGS := --std=c++14 -Wall -Wconversion -Werror -MMD
+
+ifdef OPT
+CXXFLAGS += -O4
+endif
+
+ifdef LIBCWD
+ifneq (, $(shell ldconfig -p | grep libcwd))
+LDLIBS += -lcwd
+CXXFLAGS += -DCWDEBUG
+endif
+endif
 
 SRCTOP=.
 OBJDIR=obj
@@ -14,7 +25,7 @@ $(info SRCS is $(SRCS))
 $(info OBJS is $(OBJS))
 
 $(TEST): $(OBJS)
-	$(CXX) $(OBJS) $(CXXFLAGS) -o $(TEST)
+	$(CXX) $(OBJS) $(CXXFLAGS) $(LDLIBS) -o $(TEST)
 
 test: $(TEST)
 	./$(TEST)
