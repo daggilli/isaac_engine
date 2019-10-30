@@ -30,13 +30,13 @@
 #include <cstring>
 #include <iomanip>
 #include <ios>
+#include <memory>
 #include <utility>
 #ifdef __USE_MOCKRANDOM__
 #include "test/unittest/mockrandom.h"
 #else
 #include <random>
 #endif
-#include <memory>
 
 static_assert(__cplusplus >= 201402L, "C++ version must be C++14 or greater");
 
@@ -68,10 +68,14 @@ namespace IsaacRNG {
       return is;
     }
     Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
-    Isaac(const uint32_t* const seedArr, const std::size_t seedlen) : randrsl(new uint32_t[kRandSize]) { seed(seedArr, seedlen); }
-    Isaac(const char* const seedArr, const std::size_t seedlen) : randrsl(new uint32_t[kRandSize]) { seed(seedArr, seedlen); }
-    Isaac(std::random_device& rd) : randrsl(new uint32_t[kRandSize]) { seed(rd); }
-    Isaac(const Isaac& isa) : randrsl(new uint32_t[kRandSize]) {
+    Isaac(const uint32_t* const seedArr, const std::size_t seedlen) : randrsl(std::make_unique<uint32_t[]>(kRandSize)) {
+      seed(seedArr, seedlen);
+    }
+    Isaac(const char* const seedArr, const std::size_t seedlen) : randrsl(std::make_unique<uint32_t[]>(kRandSize)) {
+      seed(seedArr, seedlen);
+    }
+    Isaac(std::random_device& rd) : randrsl(std::make_unique<uint32_t[]>(kRandSize)) { seed(rd); }
+    Isaac(const Isaac& isa) : randrsl(std::make_unique<uint32_t[]>(kRandSize)) {
       randa = isa.randa;
       randb = isa.randb;
       randc = isa.randc;

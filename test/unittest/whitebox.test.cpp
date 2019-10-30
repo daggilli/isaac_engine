@@ -147,7 +147,7 @@ TEST_CASE("Construct an Isaac engine from another one (pass)", "[engcopyconstruc
   IsaacRNG::IsaacEngine isa;
   IsaacRNG::IsaacEngine isb(isa);
 
-  REQUIRE(std::equal(isa.prng.randrsl, isa.prng.randrsl + IsaacRNG::RANDOM_SEED_SIZE, isb.prng.randrsl));
+  REQUIRE(std::equal(isa.prng.randrsl.get(), isa.prng.randrsl.get() + IsaacRNG::RANDOM_SEED_SIZE, isb.prng.randrsl.get()));
   REQUIRE(isa.prng.randa == isb.prng.randa);
   REQUIRE(isa.prng.randb == isb.prng.randb);
   REQUIRE(isa.prng.randc == isb.prng.randc);
@@ -159,11 +159,11 @@ TEST_CASE("Move construct an Isaac engine from another one (pass)", "[engmovecon
   uint32_t ra = isa.prng.randa, rb = isa.prng.randb, rc = isa.prng.randc, rcnt = isa.prng.randcnt;
 
   uint32_t *rsl = new uint32_t[IsaacRNG::RANDOM_SEED_SIZE];
-  std::copy(isa.prng.randrsl, isa.prng.randrsl + IsaacRNG::RANDOM_SEED_SIZE, rsl);
+  std::copy(isa.prng.randrsl.get(), isa.prng.randrsl.get() + IsaacRNG::RANDOM_SEED_SIZE, rsl);
 
   IsaacRNG::IsaacEngine isb(std::move(isa));
 
-  REQUIRE(std::equal(isb.prng.randrsl, isb.prng.randrsl + IsaacRNG::RANDOM_SEED_SIZE, rsl));
+  REQUIRE(std::equal(isb.prng.randrsl.get(), isb.prng.randrsl.get() + IsaacRNG::RANDOM_SEED_SIZE, rsl));
   REQUIRE(isa.prng.randa == 0);
   REQUIRE(isa.prng.randb == 0);
   REQUIRE(isa.prng.randc == 0);
