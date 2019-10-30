@@ -199,4 +199,4 @@ Tests are found in the [test](test) directory. The directory [test/unittest](tes
 
 This project uses the [Catch2](https://github.com/catchorg/Catch2) library for testing. The `catch.hpp` include file will need to be in your compiler's include path. Catch is available as a package for Debian-like Linux distros and as a Homebrew formula (catch2) for macos, among others.
 
-To build and run the tests under GNU `make`, navigate to the `test/unittest` directory and run `make test`.
+To build and run the tests under GNU `make`, navigate to the `test/unittest` directory and run `make test`. If the `OPT` flag is specified (*e.g.* `make OPT=1 test`) then the tests will be compiled with the optimisation level set to `-O4`. If the `LIBCWD` flag is specified and the [cwd](http://libcwd.sourceforge.net/) C++ debugging library is found, then minimal support for runtime debugging checks will be enabled. No additional instrumenting of the code is neeeded; `libcwd` out of the box will detect things like null pointer dereferences and double deletes.
