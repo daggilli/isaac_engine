@@ -1,5 +1,6 @@
-#ifndef __ISAAC_H__
-#define __ISAAC_H__
+// Copyright (c) 2019–2026 David Gillies
+// SPDX-License-Identifier: Unlicense
+#pragma once
 
 /**********************************************************************************
 
@@ -30,11 +31,13 @@
 #include <cstring>
 #include <iomanip>
 #include <ios>
+#include <random>
 #include <utility>
 #ifdef __USE_MOCKRANDOM__
-#include "test/unittest/mockrandom.h"
+#include "test/unittest/mockrandom.hpp"
+using entropy_source = IsaacRNG::mock_entropy_source;
 #else
-#include <random>
+using entropy_source = std::random_device;
 #endif
 
 static_assert(__cplusplus >= 201402L, "C++ version must be C++14 or greater");
@@ -69,7 +72,7 @@ namespace IsaacRNG {
     Isaac() : Isaac(static_cast<uint32_t*>(nullptr), 0) {}
     Isaac(const uint32_t* const seedArr, const std::size_t seedlen) : randrsl(new uint32_t[kRandSize]) { seed(seedArr, seedlen); }
     Isaac(const char* const seedArr, const std::size_t seedlen) : randrsl(new uint32_t[kRandSize]) { seed(seedArr, seedlen); }
-    Isaac(std::random_device& rd) : randrsl(new uint32_t[kRandSize]) { seed(rd); }
+    Isaac(entropy_source& rd) : randrsl(new uint32_t[kRandSize]) { seed(rd); }
     Isaac(const Isaac& isa) : randrsl(new uint32_t[kRandSize]) {
       randa = isa.randa;
       randb = isa.randb;
@@ -84,7 +87,9 @@ namespace IsaacRNG {
           randcnt(std::exchange(isa.randcnt, 0)),
           randrsl(std::exchange(isa.randrsl, nullptr)) {}
 
-    ~Isaac() { delete[] randrsl; }
+    ~Isaac() {
+      if (randrsl) delete[] randrsl;
+    }
     Isaac& operator=(const Isaac& isa) {
       if (this != &isa) {
         randa = isa.randa;
@@ -126,7 +131,7 @@ namespace IsaacRNG {
       randinit(true);
     }
 
-    void seed(std::random_device& rd) {
+    void seed(entropy_source& rd) {
       std::generate(randrsl, randrsl + kRandSize, [&rd]() -> uint32_t { return static_cast<uint32_t>(rd()); });
       randinit(true);
     }
@@ -323,7 +328,7 @@ namespace IsaacRNG {
     uint32_t randa, randb, randc;
     uint32_t randcnt;
     // uint32_t randrsl[kRandSize];
-    uint32_t* randrsl;
+    uint32_t* randrsl = nullptr;
 
     class FormatSaver {
      public:
@@ -336,5 +341,3 @@ namespace IsaacRNG {
     };
   };
 }  // namespace IsaacRNG
-
-#endif

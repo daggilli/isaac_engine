@@ -1,3 +1,5 @@
+// Copyright (c) 2019–2026 David Gillies
+// SPDX-License-Identifier: Unlicense
 #define CATCH_CONFIG_MAIN
 
 #ifndef __USE_MOCKRANDOM__
@@ -5,7 +7,7 @@
 #endif
 
 #include <algorithm>
-#include <catch/catch.hpp>
+#include <catch2/catch.hpp>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -16,8 +18,8 @@
 #define private public
 #endif
 
-#include "../../isaac.h"
-#include "../../isaac_engine.h"
+#include "../../isaac.hpp"
+#include "../../isaac_engine.hpp"
 
 // g++ -std=c++11 -Wall -o isaac_engine.test isaac_engine.test.cpp
 

@@ -1,5 +1,6 @@
-#ifndef __ISAAC_ENGINE_H__
-#define __ISAAC_ENGINE_H__
+// Copyright (c) 2019–2026 David Gillies
+// SPDX-License-Identifier: Unlicense
+#pragma once
 
 /**********************************************************************************
 
@@ -27,12 +28,17 @@
 
 #include <algorithm>
 #include <cstdint>
-#ifndef __USE_MOCKRANDOM__
 #include <random>
+#ifdef __USE_MOCKRANDOM__
+#include "test/unittest/mockrandom.hpp"
+using entropy_source = IsaacRNG::mock_entropy_source;
+#else
+using entropy_source = std::random_device;
 #endif
 #include <string>
 #include <vector>
-#include "isaac.h"
+
+#include "isaac.hpp"
 
 namespace IsaacRNG {
   class IsaacEngine {
@@ -44,7 +50,7 @@ namespace IsaacRNG {
     static constexpr result_type(max)() { return UINT32_MAX; }
 
     IsaacEngine() : prng() {}
-    IsaacEngine(std::random_device &rd) : prng(rd) {}
+    IsaacEngine(entropy_source &rd) : prng(rd) {}
     IsaacEngine(const std::vector<uint32_t> &seedVec) : prng(seedVec.data(), seedVec.size()) {}
     IsaacEngine(const std::string &seedStr) : prng(seedStr.data(), seedStr.length()) {}
     IsaacEngine(const IsaacEngine &iseng) : prng(iseng.prng) {}
@@ -62,7 +68,7 @@ namespace IsaacRNG {
     }
 
     void seed() { prng.seed(static_cast<uint32_t *>(nullptr), 0); }
-    void seed(std::random_device &rd) { prng.seed(rd); }
+    void seed(entropy_source &rd) { prng.seed(rd); }
     void seed(const std::vector<uint32_t> &seedVec) { prng.seed(seedVec.data(), seedVec.size()); }
     void seed(const std::string &seedStr) { prng.seed(seedStr.data(), seedStr.length()); }
     void seed(const IsaacEngine &iseng) {
@@ -83,4 +89,3 @@ namespace IsaacRNG {
     Isaac prng;
   };
 }  // namespace IsaacRNG
-#endif
