@@ -1,5 +1,6 @@
-#ifndef __MOCKRANDOM_H__
-#define __MOCKRANDOM_H__
+// Copyright (c) 2019–2026 David Gillies
+// SPDX-License-Identifier: Unlicense
+#pragma once
 
 /**********************************************************************************
 
@@ -17,17 +18,16 @@
   is preferred.
 
 **********************************************************************************/
+#include <cstdint>
 
-namespace std {
-  class random_device {
+namespace IsaacRNG {
+  class mock_entropy_source {
    public:
     using result_type = uint32_t;
     static constexpr result_type(min)() { return 0; }
     static constexpr result_type(max)() { return UINT32_MAX; }
 
-    random_device() {}
     result_type operator()() { return 0; }
     double entropy() { return 0.0; }
   };
-}  // namespace std
-#endif
+}  // namespace IsaacRNG

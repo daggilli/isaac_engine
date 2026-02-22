@@ -1,9 +1,11 @@
+// Copyright (c) 2019–2026 David Gillies
+// SPDX-License-Identifier: Unlicense
 #ifndef __USE_MOCKRANDOM__
 #define __USE_MOCKRANDOM__
 #endif
 
 #include <algorithm>
-#include <catch/catch.hpp>
+#include <catch2/catch.hpp>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -14,8 +16,8 @@
 #define private public
 #endif
 
-#include "../../isaac.h"
-#include "../../isaac_engine.h"
+#include "../../isaac.hpp"
+#include "../../isaac_engine.hpp"
 
 TEST_CASE("Isaac internal seed vector matches after two rounds with zero seed (pass)", "[internal]") {
   IsaacRNG::Isaac isa;
@@ -64,7 +66,7 @@ TEST_CASE("Isaac internal seed vector matches reference with known key (pass)", 
 }
 
 TEST_CASE("Construct an Isaac engine with a random device (pass)", "[randeviceconstruct]") {
-  std::random_device rd;
+  entropy_source rd;
 
   IsaacRNG::IsaacEngine isasrd(rd);
 
@@ -178,7 +180,7 @@ TEST_CASE("Move construct an Isaac engine from another one (pass)", "[engmovecon
 }
 
 TEST_CASE("Seed an Isaac engine with a random device (pass)", "[randeviceseed]") {
-  std::random_device rd;
+  entropy_source rd;
 
   IsaacRNG::IsaacEngine isasrd;
 

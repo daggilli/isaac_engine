@@ -1,3 +1,5 @@
+// Copyright (c) 2019–2026 David Gillies
+// SPDX-License-Identifier: Unlicense
 #include <cstdint>
 #include <cstring>
 #include <iomanip>
@@ -5,8 +7,9 @@
 #include <random>
 #include <string>
 #include <vector>
-#include "isaac.h"
-#include "isaac_engine.h"
+
+#include "isaac.hpp"
+#include "isaac_engine.hpp"
 
 int main() {
   IsaacRNG::Isaac iscDefault;  // empty ctor - seed all zeroes
