@@ -16,8 +16,8 @@
 #define private public
 #endif
 
-#include "../../isaac.hpp"
-#include "../../isaac_engine.hpp"
+#include "../include/isaac.hpp"
+#include "../include/isaac_engine.hpp"
 
 TEST_CASE("Isaac internal seed vector matches after two rounds with zero seed (pass)", "[internal]") {
   IsaacRNG::Isaac isa;

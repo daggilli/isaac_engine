@@ -18,8 +18,8 @@
 #define private public
 #endif
 
-#include "../../isaac.hpp"
-#include "../../isaac_engine.hpp"
+#include "../include/isaac.hpp"
+#include "../include/isaac_engine.hpp"
 
 // g++ -std=c++11 -Wall -o isaac_engine.test isaac_engine.test.cpp
 

@@ -34,7 +34,7 @@
 #include <random>
 #include <utility>
 #ifdef __USE_MOCKRANDOM__
-#include "test/unittest/mockrandom.hpp"
+#include "mockrandom.hpp"
 using entropy_source = IsaacRNG::mock_entropy_source;
 #else
 using entropy_source = std::random_device;
